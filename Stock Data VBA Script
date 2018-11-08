@@ -1,0 +1,71 @@
+Sub StockMarket()
+Dim WS As Worksheet
+    For Each WS In ActiveWorkbook.Worksheets
+    WS.Activate
+        LastR = WS.Cells(Rows.Count, 1).End(xlUp).Row
+        Cells(1, "I").Value = "Ticker"
+        Cells(1, "J").Value = "Yearly Change"
+        Cells(1, "K").Value = "Percent Change"
+        Cells(1, "L").Value = "Total Stock Volume"
+        Dim OP, CP, YC, PC, V, R  As Double
+        Dim Ticker As String
+        Dim C As Integer
+        Dim i As Long
+        V = 0
+        R = 2
+        C = 1   
+        OP = Cells(2, C + 2).Value      
+        For i = 2 To LastR
+            If Cells(i + 1, C).Value <> Cells(i, C).Value Then        
+                Ticker = Cells(i, C).Value
+                Cells(R, C + 8).Value = Ticker
+                CP = Cells(i, C + 5).Value             
+                YC = CP - OP
+                Cells(R, C + 9).Value = YC      
+                If (OP = 0 And CP = 0) Then
+                    PC = 0
+                ElseIf (OP = 0 And CP <> 0) Then
+                    PC = 1
+                Else
+                    PC = YC / OP
+                    Cells(R, C + 10).Value = PC
+                    Cells(R, C + 10).NumberFormat = "0.00%"
+                End If      
+                V = V + Cells(i, C + 6).Value
+                Cells(R, C + 11).Value = V           
+                R = R + 1
+                OP = Cells(i + 1, C + 2)
+                V = 0
+            Else
+                V = V + Cells(i, C + 6).Value
+            End If
+        Next i
+        YCR = WS.Cells(Rows.Count, C + 8).End(xlUp).Row
+        For j = 2 To YCR
+            If (Cells(j, C + 9).Value > 0 Or Cells(j, C + 9).Value = 0) Then
+                Cells(j, C + 9).Interior.Color = vbGreen
+            ElseIf Cells(j, C + 9).Value < 0 Then
+                Cells(j, C + 9).Interior.Color = vbRed
+            End If
+        Next j  
+        Cells(2, C + 14).Value = "Greatest % Increase"
+        Cells(3, C + 14).Value = "Greatest % Decrease"
+        Cells(4, C + 14).Value = "Greatest Total Volume"
+        Cells(1, C + 15).Value = "Ticker"
+        Cells(1, C + 16).Value = "Value"
+        For z = 2 To YCR
+            If Cells(Z, C + 10).Value = Application.WorksheetFunction.Max(WS.Range("K2:K" & YCR)) Then
+                Cells(2, C + 15).Value = Cells(Z, C + 8).Value
+                Cells(2, C + 16).Value = Cells(Z, C + 10).Value
+                Cells(2, C + 16).NumberFormat = "0.00%"
+            ElseIf Cells(Z, C + 10).Value = Application.WorksheetFunction.Min(WS.Range("K2:K" & YCR)) Then
+                Cells(3, C + 15).Value = Cells(Z, C + 8).Value
+                Cells(3, C + 16).Value = Cells(Z, C + 10).Value
+                Cells(3, C + 16).NumberFormat = "0.00%"
+            ElseIf Cells(Z, C + 11).Value = Application.WorksheetFunction.Max(WS.Range("L2:L" & YCR)) Then
+                Cells(4, C + 15).Value = Cells(Z, C + 8).Value
+                Cells(4, C + 16).Value = Cells(Z, C + 11).Value
+            End If
+        Next z       
+    Next WS       
+End Sub
